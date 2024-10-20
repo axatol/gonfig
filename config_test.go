@@ -9,13 +9,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPointerInput(t *testing.T) {
+func TestNewConfigPointerInput(t *testing.T) {
 	target := struct{}{}
+
+	// invalid
 	_, err := NewConfig(target)
 	assert.ErrorContains(t, err, "must specify non-nil pointer")
+
+	// valid
+	_, err = NewConfig(&target)
+	assert.NoError(t, err)
 }
 
-func TestAllTypes(t *testing.T) {
+func TestLoadAllTypes(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -97,9 +103,6 @@ func TestAllTypes(t *testing.T) {
 	for _, test := range tests {
 		t.Setenv(test.name, test.input)
 	}
-
-	// err = config.ReadEnv()
-	// assert.NoError(t, err)
 
 	var oldFlags = flag.CommandLine
 	flag.CommandLine = flag.NewFlagSet("test", flag.ContinueOnError)

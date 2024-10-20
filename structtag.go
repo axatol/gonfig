@@ -8,10 +8,11 @@ import (
 
 var (
 	// DefaultTag denotes the value to use if not set by other means. Must be
-	// resolve to the same type as the value receiver
+	// parseable to the same type as the value receiver
 	DefaultTag = "default"
 	// DelimiterTag denotes the separator used for slice types and enum options
-	DelimiterTag = "delimiter"
+	// (defaults to ",")
+	DelimiterTag = "delim"
 	// EnumTag denotes list of choices to constrain the value by. Every element
 	// must be resolvable to the same type as the value reciver
 	EnumTag = "enum"
@@ -20,6 +21,7 @@ var (
 	// FlagTag denotes the name of the cli flag
 	FlagTag = "flag"
 	// RequiredTag denotes whether or not the value must be set
+	// (defaults to false)
 	RequiredTag = "required"
 	// UsageTag denotes help text for use with cli flags
 	UsageTag = "usage"

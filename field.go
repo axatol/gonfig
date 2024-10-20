@@ -24,7 +24,7 @@ type Field struct {
 	Delimiter string
 	Required  bool
 	Enum      []string
-	Value     Value
+	Value     *Value
 }
 
 // NewField extracts and parses the struct tags of a field and creates a value
@@ -68,8 +68,20 @@ func NewField(t reflect.StructField, v reflect.Value) (*Field, error) {
 // Set accepts a raw string value and validates it based on struct tags, then
 // passes it through to the value setter for further parsing
 func (f Field) Set(s string) error {
-	if f.Enum != nil && !slices.Contains(f.Enum, s) {
-		return fmt.Errorf("value %s was not a member of [%s]", s, strings.Join(f.Enum, ", "))
+
+	if f.Enum != nil {
+		if f.Value.IsSlice() {
+			for _, rawElem := range strings.Split(s, f.Delimiter) {
+				if !slices.Contains(f.Enum, rawElem) {
+					return fmt.Errorf("value '%s' was not a member of [%s]", rawElem, strings.Join(f.Enum, ", "))
+				}
+			}
+		}
+
+		if !f.Value.IsSlice() && !slices.Contains(f.Enum, s) {
+			return fmt.Errorf("value '%s' was not a member of [%s]", s, strings.Join(f.Enum, ", "))
+		}
+
 	}
 
 	if err := f.Value.Set(s); err != nil {

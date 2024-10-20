@@ -53,10 +53,6 @@ func NewConfig(target any) (*Config, error) {
 			return nil, fmt.Errorf("failed to configure field from struct tags '%s': %s", f.Name, err)
 		}
 
-		if !field.Required && field.EnvName == nil && field.FlagName == nil {
-			continue
-		}
-
 		fields = append(fields, field)
 	}
 

@@ -8,29 +8,25 @@ import (
 	"time"
 )
 
-// Value represents a settable receiver which is compatible with flag.Value
-type Value interface {
-	IsSet() bool
-	Set(string) error
-	Get() any
-	String() string
-}
-
 // ValueParser receives a raw string and returns the resolved value or an error
 type ValueParser func(string) (any, error)
 
-// ValueImpl is the built-in concrete implementation of Value
-type ValueImpl struct {
+// Value is the built-in concrete ementation of Value
+type Value struct {
 	set    bool
 	value  reflect.Value
 	parser ValueParser
 }
 
-func (v ValueImpl) IsSet() bool {
+func (v Value) IsSet() bool {
 	return v.set
 }
 
-func (v *ValueImpl) Set(raw string) error {
+func (v Value) IsSlice() bool {
+	return v.value.Kind() == reflect.Slice
+}
+
+func (v *Value) Set(raw string) error {
 	if !v.value.CanSet() {
 		return fmt.Errorf("field cannot be set")
 	}
@@ -45,15 +41,15 @@ func (v *ValueImpl) Set(raw string) error {
 	return nil
 }
 
-func (v ValueImpl) Get() any {
+func (v Value) Get() any {
 	return v.value.Interface()
 }
 
-func (v ValueImpl) String() string {
+func (v Value) String() string {
 	return v.value.String()
 }
 
-func NewValue(t reflect.StructField, v reflect.Value) Value {
+func NewValue(t reflect.StructField, v reflect.Value) *Value {
 	delim := getDelimiter(t)
 
 	switch v.Type() {
@@ -61,102 +57,102 @@ func NewValue(t reflect.StructField, v reflect.Value) Value {
 	// bool
 
 	case reflect.TypeFor[bool]():
-		return &ValueImpl{value: v, parser: parseBoolValue}
+		return &Value{value: v, parser: parseBoolValue}
 
 	case reflect.TypeFor[[]bool]():
-		return &ValueImpl{value: v, parser: parseSliceValue[bool](delim, parseBoolValue)}
+		return &Value{value: v, parser: parseSliceValue[bool](delim, parseBoolValue)}
 
 	// strings
 
 	case reflect.TypeFor[time.Duration]():
-		return &ValueImpl{value: v, parser: ValueParser(parseDurationValue)}
+		return &Value{value: v, parser: ValueParser(parseDurationValue)}
 
 	case reflect.TypeFor[[]time.Duration]():
-		return &ValueImpl{value: v, parser: parseSliceValue[time.Duration](delim, parseDurationValue)}
+		return &Value{value: v, parser: parseSliceValue[time.Duration](delim, parseDurationValue)}
 
 	case reflect.TypeFor[string]():
-		return &ValueImpl{value: v, parser: parseStringValue}
+		return &Value{value: v, parser: parseStringValue}
 
 	case reflect.TypeFor[[]string]():
-		return &ValueImpl{value: v, parser: parseSliceValue[string](delim, parseStringValue)}
+		return &Value{value: v, parser: parseSliceValue[string](delim, parseStringValue)}
 
 	// int
 
 	case reflect.TypeFor[int]():
-		return &ValueImpl{value: v, parser: parseIntValue[int]}
+		return &Value{value: v, parser: parseIntValue[int]}
 
 	case reflect.TypeFor[[]int]():
-		return &ValueImpl{value: v, parser: parseSliceValue[int](delim, parseIntValue[int])}
+		return &Value{value: v, parser: parseSliceValue[int](delim, parseIntValue[int])}
 
 	case reflect.TypeFor[int8]():
-		return &ValueImpl{value: v, parser: parseIntValue[int8]}
+		return &Value{value: v, parser: parseIntValue[int8]}
 
 	case reflect.TypeFor[[]int8]():
-		return &ValueImpl{value: v, parser: parseSliceValue[int8](delim, parseIntValue[int8])}
+		return &Value{value: v, parser: parseSliceValue[int8](delim, parseIntValue[int8])}
 
 	case reflect.TypeFor[int16]():
-		return &ValueImpl{value: v, parser: parseIntValue[int16]}
+		return &Value{value: v, parser: parseIntValue[int16]}
 
 	case reflect.TypeFor[[]int16]():
-		return &ValueImpl{value: v, parser: parseSliceValue[int16](delim, parseIntValue[int16])}
+		return &Value{value: v, parser: parseSliceValue[int16](delim, parseIntValue[int16])}
 
 	case reflect.TypeFor[int32]():
-		return &ValueImpl{value: v, parser: parseIntValue[int32]}
+		return &Value{value: v, parser: parseIntValue[int32]}
 
 	case reflect.TypeFor[[]int32]():
-		return &ValueImpl{value: v, parser: parseSliceValue[int32](delim, parseIntValue[int32])}
+		return &Value{value: v, parser: parseSliceValue[int32](delim, parseIntValue[int32])}
 
 	case reflect.TypeFor[int64]():
-		return &ValueImpl{value: v, parser: parseIntValue[int64]}
+		return &Value{value: v, parser: parseIntValue[int64]}
 
 	case reflect.TypeFor[[]int64]():
-		return &ValueImpl{value: v, parser: parseSliceValue[int64](delim, parseIntValue[int64])}
+		return &Value{value: v, parser: parseSliceValue[int64](delim, parseIntValue[int64])}
 
 	// uint
 
 	case reflect.TypeFor[uint]():
-		return &ValueImpl{value: v, parser: parseUintValue[uint]}
+		return &Value{value: v, parser: parseUintValue[uint]}
 
 	case reflect.TypeFor[[]uint]():
-		return &ValueImpl{value: v, parser: parseSliceValue[uint](delim, parseUintValue[uint])}
+		return &Value{value: v, parser: parseSliceValue[uint](delim, parseUintValue[uint])}
 
 	case reflect.TypeFor[uint8]():
-		return &ValueImpl{value: v, parser: parseUintValue[uint8]}
+		return &Value{value: v, parser: parseUintValue[uint8]}
 
 	case reflect.TypeFor[[]uint8]():
-		return &ValueImpl{value: v, parser: parseSliceValue[uint8](delim, parseUintValue[uint8])}
+		return &Value{value: v, parser: parseSliceValue[uint8](delim, parseUintValue[uint8])}
 
 	case reflect.TypeFor[uint16]():
-		return &ValueImpl{value: v, parser: parseUintValue[uint16]}
+		return &Value{value: v, parser: parseUintValue[uint16]}
 
 	case reflect.TypeFor[[]uint16]():
-		return &ValueImpl{value: v, parser: parseSliceValue[uint16](delim, parseUintValue[uint16])}
+		return &Value{value: v, parser: parseSliceValue[uint16](delim, parseUintValue[uint16])}
 
 	case reflect.TypeFor[uint32]():
-		return &ValueImpl{value: v, parser: parseUintValue[uint32]}
+		return &Value{value: v, parser: parseUintValue[uint32]}
 
 	case reflect.TypeFor[[]uint32]():
-		return &ValueImpl{value: v, parser: parseSliceValue[uint32](delim, parseUintValue[uint32])}
+		return &Value{value: v, parser: parseSliceValue[uint32](delim, parseUintValue[uint32])}
 
 	case reflect.TypeFor[uint64]():
-		return &ValueImpl{value: v, parser: parseUintValue[uint64]}
+		return &Value{value: v, parser: parseUintValue[uint64]}
 
 	case reflect.TypeFor[[]uint64]():
-		return &ValueImpl{value: v, parser: parseSliceValue[uint64](delim, parseUintValue[uint64])}
+		return &Value{value: v, parser: parseSliceValue[uint64](delim, parseUintValue[uint64])}
 
 	// float
 
 	case reflect.TypeFor[float32]():
-		return &ValueImpl{value: v, parser: parseFloatValue[float32]}
+		return &Value{value: v, parser: parseFloatValue[float32]}
 
 	case reflect.TypeFor[[]float32]():
-		return &ValueImpl{value: v, parser: parseSliceValue[float32](delim, parseFloatValue[float32])}
+		return &Value{value: v, parser: parseSliceValue[float32](delim, parseFloatValue[float32])}
 
 	case reflect.TypeFor[float64]():
-		return &ValueImpl{value: v, parser: parseFloatValue[float64]}
+		return &Value{value: v, parser: parseFloatValue[float64]}
 
 	case reflect.TypeFor[[]float64]():
-		return &ValueImpl{value: v, parser: parseSliceValue[float64](delim, parseFloatValue[float64])}
+		return &Value{value: v, parser: parseSliceValue[float64](delim, parseFloatValue[float64])}
 
 	}
 

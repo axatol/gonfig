@@ -27,15 +27,20 @@ type config struct {
 	ApiKey string `flag:"api-key"`
 }
 
-func main() {
+func init() {
 	os.Setenv("HOST", "localhost")
+	os.argv
+}
+
+// load config using defaults
+func example1() {
 	cfg := config{}
-
-	// load config using defaults
 	_ = gonfig.Load(&cfg)
+	fmt.Printf("%s:%d?key=%s\n", cfg.Host, cfg.Port, cfg.ApiKey)
+}
 
-	// OR manually run each step
-
+// or manually run each step
+func example2() {
 	// initialise configurator
 	fs, _ := gonfig.NewConfig(&cfg)
 
@@ -51,11 +56,6 @@ func main() {
 	// ensure required fields are set
 	_ = fs.Validate()
 
-	fmt.Printf(
-		"%s:%d?key=%s\n",
-		cfg.Host,
-		cfg.Port,
-		cfg.ApiKey,
-	)
+	fmt.Printf("%s:%d?key=%s\n", cfg.Host, cfg.Port, cfg.ApiKey)
 }
 ```
